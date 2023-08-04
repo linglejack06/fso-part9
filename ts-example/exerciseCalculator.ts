@@ -1,3 +1,5 @@
+import isNotNumber from "./utils";
+
 interface exerciseResult {
   periodLength: number;
   trainingDays: number;
@@ -6,6 +8,26 @@ interface exerciseResult {
   ratingDescription: string;
   target: number;
   average: number;
+}
+interface exerciseFuncValues {
+  days: number[],
+  target: number
+}
+
+const processArguments = (args: string[]): exerciseFuncValues => {
+  if(args.length < 4) {
+    throw new Error('Not enough arguments');
+  }
+  const numArgs = args.slice(2);
+  const adjArgs = numArgs.map((num) => {
+    if (isNotNumber(num)) throw new Error('All args must be a number');
+    return Number(num);
+  });
+
+  return {
+    days: adjArgs.slice(1),
+    target: adjArgs[0]
+  }
 }
 type ratingDescription = 'Poor' | 'Average' | 'Great';
 const exerciseCalculator = (days: number[], target: number): exerciseResult => {
@@ -37,5 +59,12 @@ const exerciseCalculator = (days: number[], target: number): exerciseResult => {
     average,
   }
 }
-
-console.log(exerciseCalculator([2, 2, 2, 0], 8));
+try {
+  const { days, target } = processArguments(process.argv);
+  console.log(exerciseCalculator(days, target));
+} catch (error: unknown) {
+  let errorMessage = 'An Error Ocurred:';
+  if (error instanceof Error) {
+    errorMessage += error.message;
+  } console.error(errorMessage);
+}
