@@ -11,8 +11,7 @@ patientsRouter.get('/', (_req, res) => {
 });
 patientsRouter.post('/', (req, res) => {
   try {
-    console.log(req);
-    const newPatient: PatientEntry = toPatientEntry();
+    const newPatient: PatientEntry = toPatientEntry(req.body);
     const patient: SafePatient = patientsService.addPatient(newPatient);
     return res.send(patient);
   } catch (error) {
