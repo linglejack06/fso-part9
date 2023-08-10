@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import EntryList from './components/EntryList'
 
 function App() {
   return (
     <>
+      <EntryList />
     </>
   )
 }
