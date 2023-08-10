@@ -1,4 +1,4 @@
-import { Gender, PatientEntry } from "./types";
+import { Entry, Gender, PatientEntry } from "./types";
 
 const isString = (param: unknown): param is string => param instanceof String || typeof param === 'string';
 const isGender = (gender: string): gender is Gender => {
@@ -37,18 +37,31 @@ const parseDateOfBirth = (date: unknown): string => {
   }
   return date;
 };
+const parseEntries = (entries: unknown): Entry[] => {
+  if (!Array.isArray(entries)) {
+    throw new Error('Entries must be an array of objects');
+  }
+  const parsedEntries: Entry[] = entries.map((entry) => {
+    if (typeof entry !== 'object') {
+      throw new Error('Entries must be an object');
+    }
+    return entry as Entry;
+  });
+  return parsedEntries;
+};
 const toPatientEntry = (entry: unknown): PatientEntry => {
   if (!entry || typeof entry !== 'object') {
     throw new Error('Missing request body');
   }
 
-  if ('gender' in entry && 'name' in entry && 'ssn' in entry && 'dateOfBirth' in entry && 'occupation' in entry) {
+  if ('gender' in entry && 'name' in entry && 'ssn' in entry && 'dateOfBirth' in entry && 'occupation' in entry && 'entries' in entry) {
     return {
       name: parseName(entry.name),
       ssn: parseSsn(entry.ssn),
       gender: parseGender(entry.gender),
       dateOfBirth: parseDateOfBirth(entry.dateOfBirth),
       occupation: parseOccupation(entry.occupation),
+      entries: parseEntries(entry.entries),
     };
   }
   throw new Error('Missing parameters');

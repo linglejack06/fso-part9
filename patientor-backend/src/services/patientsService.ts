@@ -14,6 +14,10 @@ const getPatients = (): SafePatient[] => {
   }));
   return people;
 };
+const getPatientById = (id: string): Patient | undefined => {
+  const patient = patients.find((p) => p.id === id);
+  return patient;
+};
 const addPatient = (newEntry: PatientEntry): SafePatient => {
   const id: string = uuid();
   const patient: Patient = {
@@ -32,4 +36,5 @@ const addPatient = (newEntry: PatientEntry): SafePatient => {
 export default {
   getPatients,
   addPatient,
+  getPatientById,
 };
