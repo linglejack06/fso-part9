@@ -1,6 +1,16 @@
 import { useQuery } from "react-query";
 import { getAllEntries } from "../services/entries";
+import { EntryProps } from "../types";
 
+function Entry ({ date, visibility, weather }: EntryProps) {
+  return (
+    <li>
+      <h3>{date}</h3>
+      <p>Visibility: {visibility}</p>
+      <p>Weather: {weather}</p>
+    </li>
+  )
+}
 function EntryList () {
   const response = useQuery('entries', getAllEntries);
 
@@ -13,11 +23,7 @@ function EntryList () {
     <div>
       <ul>
         {entries.map((entry) => (
-          <li key={entry.id}>
-            <h3>{entry.date}</h3>
-            <p>Visibility: {entry.visibility}</p>
-            <p>Weather: {entry.weather}</p>
-          </li>
+          <Entry key={entry.id} {...entry} />
         ))}
       </ul>
     </div>
