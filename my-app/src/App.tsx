@@ -31,6 +31,19 @@ function App() {
       backgroundMaterial: "https://type-level-typescript.com/template-literal-types",
       kind: "background",
     },
+    {
+      name: "TypeScript in frontend",
+      exerciseCount: 10,
+      description: "a hard part",
+      kind: "basic",
+    },
+    {
+      name: "Backend Development",
+      exerciseCount: 21,
+      description: "Typing the backend",
+      requirements: ["nodejs", "jest"],
+      kind: "special",
+    }
   ]
   const total = courseParts.reduce((carry, part) => carry + part.exerciseCount, 0)
   return (
