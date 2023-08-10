@@ -4,10 +4,8 @@ import axios from 'axios';
 
 import { PatientFormValues, Patient } from "../../types";
 import AddPatientModal from "../AddPatientModal";
-
-import HealthRatingBar from "../HealthRatingBar";
-
 import patientService from "../../services/patients";
+import PatientItem from "./Patient";
 
 interface Props {
   patients : Patient[]
@@ -65,14 +63,7 @@ const PatientListPage = ({ patients, setPatients } : Props ) => {
         </TableHead>
         <TableBody>
           {Object.values(patients).map((patient: Patient) => (
-            <TableRow key={patient.id}>
-              <TableCell>{patient.name}</TableCell>
-              <TableCell>{patient.gender}</TableCell>
-              <TableCell>{patient.occupation}</TableCell>
-              <TableCell>
-                <HealthRatingBar showText={false} rating={1} />
-              </TableCell>
-            </TableRow>
+            <PatientItem patient={patient} />
           ))}
         </TableBody>
       </Table>
