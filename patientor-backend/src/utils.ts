@@ -45,7 +45,7 @@ const parseEntries = (entries: unknown): Entry[] => {
     if (typeof entry !== 'object') {
       throw new Error('Entries must be an object');
     }
-    if (entry.type !== "Hospital" || entry.type !== "OccupationalHealthCare" || entry.type !== "HealthCheck") {
+    if (!isString(entry.type) || !["Hospital", "HealthCheck", "OccupationalHealthcare"].includes(entry.type as string)) {
       throw new Error('Entry must conform to types');
     }
     return entry as Entry;
