@@ -1,4 +1,4 @@
-import { Entry, Gender, PatientEntry } from "./types";
+import { Entry, EntryFromForm, Gender, PatientEntry, Diagnose, SickLeave, Discharge } from "./types";
 
 const isString = (param: unknown): param is string => param instanceof String || typeof param === 'string';
 const isGender = (gender: string): gender is Gender => {
@@ -31,7 +31,7 @@ const parseSsn = (ssn: unknown): string => {
   }
   return ssn;
 };
-const parseDateOfBirth = (date: unknown): string => {
+const parseDate = (date: unknown): string => {
   if(!isString(date) || !isDate(date)) {
     throw new Error('Date is not a string / not in correct format');
   }
@@ -52,6 +52,66 @@ const parseEntries = (entries: unknown): Entry[] => {
   });
   return parsedEntries;
 };
+const parseDescription = (desc: unknown): string => {
+  if (!isString(desc)) {
+    throw new Error('Description must be of type string');
+  }
+  return desc;
+};
+const parseSpecialist = (val: unknown): string => {
+  if (!isString(val)) {
+    throw new Error('Specialist is not of type string');
+  }
+  return val;
+};
+const parseDiagnosisCodes = (object: unknown): Array<Diagnose['code']> => {
+  if(!object || typeof object !== 'object' || !('diagnosisCodes' in object)) {
+    return [] as Array<Diagnose['code']>;
+  }
+  return object.diagnosisCodes as Array<Diagnose['code']>;
+};
+const parseHealthRating = (val: unknown): number => {
+  if(!val || typeof val !== 'number') {
+    throw new Error('Health rating must be a number');
+  }
+  if (val > 3 || val < 0) {
+    throw new Error('HEalth rating must be between 0 and 3');
+  }
+  return val;
+};
+const parseSickLeave = (obj: unknown): SickLeave => {
+  if (!obj || typeof obj !== 'object') {
+    throw new Error('Sick Leave must be an object');
+  }
+  if("startDate" in obj && "endDate" in obj) {
+    return {
+      startDate: parseDate(obj.startDate),
+      endDate: parseDate(obj.endDate),
+    };
+  }
+  throw new Error('Sick leave must contain a start and end date');
+};
+const parseEmployer = (emp: unknown): string => {
+  if(!isString(emp)) {
+    throw new Error('Employer must be a string');
+  }
+  return emp;
+};
+const parseDischarge = (obj: unknown): Discharge => {
+  if(!obj || typeof obj !== 'object') {
+    throw new Error('Discharge must be an object');
+  }
+  if("criteria" in obj && "date" in obj) {
+    if(!isString(obj.criteria)) {
+      throw new Error('Criteria must be a string');
+    }
+    return {
+      date: parseDate(obj.date),
+      criteria: obj.criteria,
+    };
+  }
+  throw new Error('Discharge must contain criteria and a date');
+};
 const toPatientEntry = (entry: unknown): PatientEntry => {
   if (!entry || typeof entry !== 'object') {
     throw new Error('Missing request body');
@@ -62,12 +122,60 @@ const toPatientEntry = (entry: unknown): PatientEntry => {
       name: parseName(entry.name),
       ssn: parseSsn(entry.ssn),
       gender: parseGender(entry.gender),
-      dateOfBirth: parseDateOfBirth(entry.dateOfBirth),
+      dateOfBirth: parseDate(entry.dateOfBirth),
       occupation: parseOccupation(entry.occupation),
       entries: parseEntries(entry.entries),
     };
   }
   throw new Error('Missing parameters');
 };
-
+export const toEntry = (entryObj: unknown): EntryFromForm => {
+  if (!entryObj || typeof entryObj !== 'object') {
+    throw new Error('Missing request body');
+  }
+  if("type" in entryObj && "description" in entryObj && "date" in entryObj && "specialist" in entryObj) {
+    switch (entryObj.type) {
+      case "HealthCheck":
+        if ("healthCheckRating" in entryObj) {
+          return {
+            description: parseDescription(entryObj.description),
+            type: entryObj.type,
+            date: parseDate(entryObj.date),
+            specialist: parseSpecialist(entryObj.specialist),
+            healthCheckRating: parseHealthRating(entryObj.healthCheckRating),
+            diagnosisCodes: parseDiagnosisCodes(entryObj),
+          };
+        }
+        throw new Error('Missing health check rating value');
+      case "Hospital": 
+        if("discharge" in entryObj) {
+          return {
+            description: parseDescription(entryObj.description),
+            type: entryObj.type,
+            date: parseDate(entryObj.date),
+            specialist: parseSpecialist(entryObj.specialist),
+            diagnosisCodes: parseDiagnosisCodes(entryObj),
+            discharge: parseDischarge(entryObj.discharge),
+          };
+        }
+        throw new Error("Entry missing discharge value");
+      case "OccupationalHealthcare":
+        if("sickLeave" in entryObj && "employerName" in entryObj) {
+          return {
+            description: parseDescription(entryObj.description),
+            type: entryObj.type,
+            date: parseDate(entryObj.date),
+            specialist: parseSpecialist(entryObj.specialist),
+            diagnosisCodes: parseDiagnosisCodes(entryObj),
+            sickLeave: parseSickLeave(entryObj.sickLeave),
+            employerName: parseEmployer(entryObj.employerName),
+          };
+        }
+        throw new Error('Entry missing sickLeave or employerName props');
+      default:
+        throw new Error("entry has wrong type");
+    }
+  }
+  throw new Error("entry does not have base properties");
+};
 export default toPatientEntry;

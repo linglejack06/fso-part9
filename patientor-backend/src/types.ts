@@ -14,11 +14,11 @@ export enum HealthCheckRating {
   "HighRisk" = 2,
   "CriticalRisk" = 3,
 }
-interface SickLeave {
+export interface SickLeave {
   startDate: string;
   endDate: string;
 }
-interface Discharge {
+export interface Discharge {
   date: string;
   criteria: string;
 }
@@ -34,7 +34,7 @@ interface HealthCheckEntry extends BaseEntry {
   healthCheckRating: HealthCheckRating;
 }
 interface OccupationalHealthcareEntry extends BaseEntry {
-  type: "OccupationalHealthCare";
+  type: "OccupationalHealthcare";
   employerName: string;
   sickLeave: SickLeave;
 }
@@ -55,7 +55,11 @@ export type SafePatient = Omit<Patient, 'ssn' | 'entries'>;
 
 export type PatientEntry = Omit<Patient, 'id'>;
 
+type UnionOmit<T, K extends string | number | symbol> = T extends unknown ? Omit<T, K> : never;
+
 export type Entry =
   | HospitalEntry
   | OccupationalHealthcareEntry
   | HealthCheckEntry;
+
+export type EntryFromForm = UnionOmit<Entry, "id">;
