@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import { Patient, SafePatient, PatientEntry } from "../types";
+import { Patient, SafePatient, PatientEntry, EntryFromForm, Entry } from "../types";
 import patients from "../data/patients";
 import { v1 as uuid } from 'uuid';
 
@@ -33,8 +33,22 @@ const addPatient = (newEntry: PatientEntry): SafePatient => {
   };
   return safePatient;
 };
+const addEntryToPatient = (newEntry: EntryFromForm, patientId: string): Patient => {
+  const id: string = uuid();
+  const entry: Entry = {
+    ...newEntry,
+    id,
+  };
+  const updatePatient = patients.find((patient) => patient.id === patientId);
+  if(!updatePatient) {
+    throw new Error("Patient not found");
+  }
+  updatePatient.entries = [...updatePatient.entries, entry];
+  return updatePatient;
+};
 export default {
   getPatients,
   addPatient,
   getPatientById,
+  addEntryToPatient,
 };

@@ -1,7 +1,7 @@
 import express from 'express';
 import patientsService from '../services/patientsService';
-import { PatientEntry, SafePatient } from '../types';
-import toPatientEntry from '../utils';
+import { EntryFromForm, PatientEntry, SafePatient, Patient } from '../types';
+import toPatientEntry, { toEntry } from '../utils';
 
 const patientsRouter = express.Router();
 
@@ -20,6 +20,18 @@ patientsRouter.post('/', (req, res) => {
     const patient: SafePatient = patientsService.addPatient(newPatient);
     return res.send(patient);
   } catch (error) {
+    if (error && typeof error === 'object' && 'message' in error) {
+      return res.status(400).send('Something went wrong: ' + error.message);
+    }
+    return res.status(400).end();
+  }
+});
+patientsRouter.post('/:id/entries', (req, res) => {
+  try {
+    const newEntry: EntryFromForm = toEntry(req.body);
+    const updatedPatient: Patient = patientsService.addEntryToPatient(newEntry, req.params.id);
+    return res.send(updatedPatient);
+  } catch(error: unknown) {
     if (error && typeof error === 'object' && 'message' in error) {
       return res.status(400).send('Something went wrong: ' + error.message);
     }
